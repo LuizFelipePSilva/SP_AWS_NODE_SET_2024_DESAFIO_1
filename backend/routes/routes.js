@@ -42,10 +42,10 @@ api.post('/cars', async (req, res) => {
       }
 
       // Retorna o carro criado
-      return res.status(201).json(newCar);
+      return res.status(201).json({id: newCar.id});
   } catch (error) {
       console.error('Erro ao criar o carro:', error);
-      return res.status(500).json({ error: 'Erro ao criar o carro' });
+      return res.status(500).json({ error: err });
   }
 });
 //Usando GET por ID
