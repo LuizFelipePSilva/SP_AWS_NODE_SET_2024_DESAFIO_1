@@ -1,7 +1,7 @@
 const express = require('express')
 const api = express.Router()
 const { Car, CarItem } = require('../models/index');
-const {Op} = require('sequelize')
+const {Op, where} = require('sequelize')
 
 //Usando o Get Geral!
 api.get('/cars', (req, res) => {
@@ -43,7 +43,7 @@ api.post('/cars', async (req, res) => {
             model,
             year,
         });
-        
+
             const carItems = uniqueItems.map(item => ({ name: item, car_id: newCar.id }));
             await CarItem.bulkCreate(carItems);
 
@@ -116,20 +116,43 @@ if(!userId) {
 if (year < 2015 || year > 2025) {
     return res.status(400).json({ error: 'year should be between 2015 and 2025' });
 }
+const uniqueItemsSet = new Set(items)
+if(uniqueItemsSet.size !== items.length) {
+    return res.status(400).json({error: "items should not contain duplicates"})
+}
+const filteredItems = items ? items.filter(item => item) : []
 try {
     const existingId = await Car.findOne({ where: {id: userId} });
 
     if (!existingId) {
         return res.status(404).json({ error: 'car not found' });
     }
-    const existingCar = await Car.findOne({ where: { brand, model, year } });
+    const existingCar = await Car.findOne({ where: { brand, model, year,} });
+    const existItemOfCar = await CarItem.findOne({where: {name: items} })
 
-    if (existingCar) {
+    if (existingCar && existItemOfCar) {
         return res.status(409).json({ error: 'there is already a car with this data' });
     }
+    const updateBody = {}
+    if(brand) updateBody.brand = brand
+    if(model) updateBody.model = model
+    if(year) updateBody.year = year
+    if(Object.keys(updateBody).length > 0) {
+        await Car.update(updateBody, {where: {id: userId}})
+    }
 
+    await CarItem.destroy({where: {car_id: userId}})
+    const carItems = filteredItems.map(item => ({
+        car_id: userId,
+        name: item
+    }))
+
+    if(carItems.length > 0) {
+        await CarItem.bulkCreate(carItems)
+    }
+    return res.status(204).send()
 } catch (error) {
-    
+    return res.status(500).json({error: error.message})
 }
 })
 
