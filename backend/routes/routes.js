@@ -1,6 +1,7 @@
 const express = require('express')
 const api = express.Router()
 const { Car, CarItem } = require('../models/index');
+const {Op} = require('sequelize')
 
 //Usando o Get Geral!
 api.get('/cars', (req, res) => {
@@ -19,12 +20,16 @@ api.post('/cars', async (req, res) => {
     if (year === undefined) {
         return res.status(400).json({ error: 'year is required' });
     }
-    if (!items || items.length == 0) {
+    if (!items || items.length === 0) {
         return res.status(400).json({ error: 'items is required' });
     }
 
     if (year < 2015 || year > 2025) {
         return res.status(400).json({ error: 'year should be between 2015 and 2025' });
+    }
+    const uniqueItemsSet = new Set(items)
+    if(uniqueItemsSet.size !== items.length) {
+        return res.status(400).json({error: "items should not contain duplicates"})
     }
     try {
         const existingCar = await Car.findOne({ where: { brand, model, year } });
@@ -32,36 +37,22 @@ api.post('/cars', async (req, res) => {
         if (existingCar) {
             return res.status(409).json({ error: 'there is already a car with this data' });
         }
+
         const newCar = await Car.create({
             brand,
             model,
             year,
         });
-
-     
-            const existingItems = await CarItem.findAll({
-                where: {
-                    name: items
-                }
-            })
-            
-            const existingItemsNames = existingItems.map(item => item.name)
-
-            const unique = items.filter(item => !existingItemsNames.includes(item))
-
-            if(unique.length > 0) {
-                const carItems = unique.map(item => ({ name: item, car_id: newCar.id }));
-                await CarItem.bulkCreate(carItems);
-            } 
         
+            const carItems = uniqueItems.map(item => ({ name: item, car_id: newCar.id }));
+            await CarItem.bulkCreate(carItems);
 
-        // Retorna o carro criado
         return res.status(201).json({ id: newCar.id });
     } catch (error) {
         console.error('Erro ao criar o carro:', error);
-        return res.status(500).json({ error: error.message});
+        return res.status(500).json({ error: error.message });
     }
-});
+});;
 //Usando GET por ID
 api.get('/cars/:id', async (req, res) => {
     const userId = req.params.id
