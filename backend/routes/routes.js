@@ -20,6 +20,9 @@ api.post('/cars', async (req, res) => {
   if(year === undefined) {
     return res.status(400).json({ error: 'year is required' });
   }
+  if(items === undefined || items.length == 0) {
+    return res.status(400).json({ error: 'items is required' });
+  }
 
   if (year < 2015 || year > 2025) {
       return res.status(400).json({ error: 'year should be between 2015 and 2025' });
