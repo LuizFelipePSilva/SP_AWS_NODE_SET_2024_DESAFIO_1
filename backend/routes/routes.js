@@ -19,7 +19,7 @@ api.post('/cars', async (req, res) => {
     if (year === undefined) {
         return res.status(400).json({ error: 'year is required' });
     }
-    if (items === undefined || items.length == 0) {
+    if (!items || items.length == 0) {
         return res.status(400).json({ error: 'items is required' });
     }
 
@@ -38,16 +38,28 @@ api.post('/cars', async (req, res) => {
             year,
         });
 
-        if (items && items.length > 0) {
-            const carItems = items.map(item => ({ name: item, car_id: newCar.id }));
-            await CarItem.bulkCreate(carItems);
-        }
+     
+            const existingItems = await CarItem.findAll({
+                where: {
+                    name: items
+                }
+            })
+            
+            const existingItemsNames = existingItems.map(item => item.name)
+
+            const unique = items.filter(item => !existingItemsNames.includes(item))
+
+            if(unique.length > 0) {
+                const carItems = unique.map(item => ({ name: item, car_id: newCar.id }));
+                await CarItem.bulkCreate(carItems);
+            } 
+        
 
         // Retorna o carro criado
         return res.status(201).json({ id: newCar.id });
     } catch (error) {
         console.error('Erro ao criar o carro:', error);
-        return res.status(500).json({ error: err });
+        return res.status(500).json({ error: error.message});
     }
 });
 //Usando GET por ID
