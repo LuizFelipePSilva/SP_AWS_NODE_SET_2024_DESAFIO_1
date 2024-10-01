@@ -81,8 +81,26 @@ api.get('/cars/:id', async (req, res) => {
     }
 })
 //Usando DELETE
-api.delete('/cars/:id', (req, res) => {
+api.delete('/cars/:id', async (req, res) => {
+const userId = req.params.id 
 
+if(!userId){
+    res.status(400).json({ error: "id is not informed" })
+}
+
+try {
+    const car = await Car.findOne({where: {id: userId} })
+    if(!car) {
+    return res.status(404).json({ error: "car not found" })
+    }
+
+    CarItem.destroy({where: {car_id: userId}})
+    Car.destroy({where: {id: userId} })
+
+    return res.status(204).send()
+} catch (err) {
+    res.status(500).json({err: err.message})
+}
 })
 //Usando PATCH
 api.patch('/cars', (req, res) => {
