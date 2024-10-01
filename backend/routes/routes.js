@@ -115,8 +115,31 @@ try {
 }
 })
 //Usando PATCH
-api.patch('/cars', (req, res) => {
+api.patch('/cars/:id', async (req, res) => {
+const userId = req.params.id
+const { brand, model, year, items } = req.body;
 
+if(!userId) {
+    return res.status(404).json({err: "id not specific"})
+}
+if (year < 2015 || year > 2025) {
+    return res.status(400).json({ error: 'year should be between 2015 and 2025' });
+}
+try {
+    const existingId = await Car.findOne({ where: {id: userId} });
+
+    if (!existingId) {
+        return res.status(404).json({ error: 'car not found' });
+    }
+    const existingCar = await Car.findOne({ where: { brand, model, year } });
+
+    if (existingCar) {
+        return res.status(409).json({ error: 'there is already a car with this data' });
+    }
+
+} catch (error) {
+    
+}
 })
 
 const existsOrError = () => {
