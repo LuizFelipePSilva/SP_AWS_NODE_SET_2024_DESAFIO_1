@@ -35,6 +35,9 @@ try {
         offset: offset
     }
 )
+if(count === 0) {
+    return res.status(204).send()
+}
 let totalPages = Math.ceil(count/limit)   
 res.status(200).json({
     count: count,
