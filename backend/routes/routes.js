@@ -31,6 +31,11 @@ try {
             ...(model && {model}),
             ...(year && {year})
         },
+        include:[{
+            model: CarItem,
+            as: 'items',
+            attributes: ['name']
+        }],
         limit: limit,
         offset: offset
     }
@@ -39,10 +44,19 @@ if(count === 0) {
     return res.status(204).send()
 }
 let totalPages = Math.ceil(count/limit)   
+
+const transformedRows = rows.map(car => ({
+    id: car.id,
+    brand: car.brand,
+    model: car.model,
+    year: car.year,
+    items: car.items.map(item => item.name)
+}))
+
 res.status(200).json({
     count: count,
     pages: totalPages,
-    data: rows
+    data: transformedRows
 })
 } catch (err) {
     res.status(404).send({err: err.message})
