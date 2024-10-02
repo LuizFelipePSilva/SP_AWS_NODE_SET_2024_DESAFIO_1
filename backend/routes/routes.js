@@ -3,21 +3,25 @@ const api = express.Router()
 const { Car, CarItem } = require('../models/index');
 const {Op, where} = require('sequelize')
 
-//Usando o Get Geral!
+
 api.get('/cars', async (req, res) => {
 let {limit, page} = req.query
 const {brand, model, year} = req.query
 
 limit = parseInt(limit)
 
-if(!limit || limit < 1) {
+if(isNaN(limit) || limit < 1) {
     limit = 5
 }
 
 if(limit > 10) {
     limit = 10
 }
-const offset = (page - 1) * limit
+
+if(isNaN(page) || page < 1) {
+    page = 1
+}
+const offset = parseInt((page - 1) * limit)
 
 try {
     const { count, rows } = await Car.findAndCountAll({
@@ -27,23 +31,38 @@ try {
             ...(model && {model}),
             ...(year && {year})
         },
+        include:[{
+            model: CarItem,
+            as: 'items',
+            attributes: ['name']
+        }],
         limit: limit,
         offset: offset
     }
 )
-let y = Math.round(count/limit)   
+if(count === 0) {
+    return res.status(204).send()
+}
+let totalPages = Math.ceil(count/limit)   
+
+const transformedRows = rows.map(car => ({
+    id: car.id,
+    brand: car.brand,
+    model: car.model,
+    year: car.year,
+    items: car.items.map(item => item.name)
+}))
+
 res.status(200).json({
     count: count,
-    pages: y,
-    data: [
-        rows
-    ]
+    pages: totalPages,
+    data: transformedRows
 })
 } catch (err) {
-    res.status(404).json({error: err.message})
+    res.status(404).send({err: err.message})
 }
 })
-//Usando o metodo POST
+
 api.post('/cars', async (req, res) => {
     const { brand, model, year, items } = req.body;
 
@@ -63,10 +82,12 @@ api.post('/cars', async (req, res) => {
     if (year < 2015 || year > 2025) {
         return res.status(400).json({ error: 'year should be between 2015 and 2025' });
     }
+
     const uniqueItemsSet = new Set(items)
     if(uniqueItemsSet.size !== items.length) {
         return res.status(400).json({error: "items should not contain duplicates"})
     }
+
     try {
         const existingCar = await Car.findOne({ where: { brand, model, year } });
 
@@ -80,16 +101,15 @@ api.post('/cars', async (req, res) => {
             year,
         });
 
-            const carItems = uniqueItems.map(item => ({ name: item, car_id: newCar.id }));
+            const carItems = [...uniqueItemsSet].map(item => ({ name: item, car_id: newCar.id }));
             await CarItem.bulkCreate(carItems);
 
         return res.status(201).json({ id: newCar.id });
     } catch (error) {
-        console.error('Erro ao criar o carro:', error);
         return res.status(500).json({ error: error.message });
     }
 });;
-//Usando GET por ID
+
 api.get('/cars/:id', async (req, res) => {
     const userId = req.params.id
     if (!userId) {
@@ -119,7 +139,7 @@ api.get('/cars/:id', async (req, res) => {
         res.status(500).json({ error: err })
     }
 })
-//Usando DELETE
+
 api.delete('/cars/:id', async (req, res) => {
 const userId = req.params.id 
 
@@ -141,7 +161,7 @@ try {
     res.status(500).json({err: err.message})
 }
 })
-//Usando PATCH
+
 api.patch('/cars/:id', async (req, res) => {
 const userId = req.params.id
 const { brand, model, year, items } = req.body;
@@ -192,7 +212,4 @@ try {
 }
 })
 
-const existsOrError = () => {
-
-}
 module.exports = api
