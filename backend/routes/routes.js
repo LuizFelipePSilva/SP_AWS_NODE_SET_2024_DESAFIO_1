@@ -164,27 +164,48 @@ try {
 
 api.patch('/cars/:id', async (req, res) => {
 const userId = req.params.id
-const { brand, model, year, items } = req.body;
+const brand = req.body.brand
+const model = req.body.model
+const year = req.body.year
+const items = req.body.items
 
 if(!userId) {
     return res.status(404).json({err: "id not specific"})
 }
-if (year < 2015 || year > 2025) {
+if (year !== undefined &&(year < 2015 || year > 2025)) {
     return res.status(400).json({ error: 'year should be between 2015 and 2025' });
 }
-const uniqueItemsSet = new Set(items)
-if(uniqueItemsSet.size !== items.length) {
-    return res.status(400).json({error: "items should not contain duplicates"})
+let filteredItems = []
+if(items) {
+    if(Array.isArray(items)) {
+    return res.status(400).json({ error: "items should be an array" });
+    }
+        
+    const uniqueItemsSet = new Set(items)
+    if(uniqueItemsSet.size !== items.length) {
+        return res.status(400).json({error: "items should not contain duplicates"})
+    }
+    filteredItems = items.filter(item => item)
 }
-const filteredItems = items ? items.filter(item => item) : []
+
+
 try {
     const existingId = await Car.findOne({ where: {id: userId} });
 
     if (!existingId) {
         return res.status(404).json({ error: 'car not found' });
     }
-    const existingCar = await Car.findOne({ where: { brand, model, year,} });
-    const existItemOfCar = await CarItem.findOne({where: {name: items} })
+
+    const verifyCar = {}
+    const verifyCarItem = {}
+    if(brand) verifyCar.brand = brand
+    if(model) verifyCar.model = model
+    if(year) verifyCar.year = year
+    if(items) verifyCarItem.items = items
+    
+    const existingCar = await Car.findOne({ where: verifyCar });
+
+    const existItemOfCar = await CarItem.findOne({where: verifyCarItem})
 
     if (existingCar && existItemOfCar) {
         return res.status(409).json({ error: 'there is already a car with this data' });
@@ -193,18 +214,20 @@ try {
     if(brand) updateBody.brand = brand
     if(model) updateBody.model = model
     if(year) updateBody.year = year
+
     if(Object.keys(updateBody).length > 0) {
         await Car.update(updateBody, {where: {id: userId}})
     }
-
-    await CarItem.destroy({where: {car_id: userId}})
-    const carItems = filteredItems.map(item => ({
-        car_id: userId,
-        name: item
-    }))
-
-    if(carItems.length > 0) {
-        await CarItem.bulkCreate(carItems)
+    if(filteredItems.length > 0) {
+        await CarItem.destroy({where: {car_id: userId}})
+        const carItems = filteredItems.map(item => ({
+            car_id: userId,
+            name: item
+        }))
+    
+        if(carItems.length > 0) {
+            await CarItem.bulkCreate(carItems)
+        }
     }
     return res.status(204).send()
 } catch (error) {
