@@ -3,7 +3,7 @@ const api = express.Router()
 const { Car, CarItem } = require('../models/index');
 const {Op, where} = require('sequelize')
 
-//Usando o Get Geral!
+
 api.get('/cars', async (req, res) => {
 let {limit, page} = req.query
 const {brand, model, year} = req.query
@@ -62,7 +62,7 @@ res.status(200).json({
     res.status(404).send({err: err.message})
 }
 })
-//Usando o metodo POST
+
 api.post('/cars', async (req, res) => {
     const { brand, model, year, items } = req.body;
 
@@ -109,7 +109,7 @@ api.post('/cars', async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 });;
-//Usando GET por ID
+
 api.get('/cars/:id', async (req, res) => {
     const userId = req.params.id
     if (!userId) {
@@ -139,7 +139,7 @@ api.get('/cars/:id', async (req, res) => {
         res.status(500).json({ error: err })
     }
 })
-//Usando DELETE
+
 api.delete('/cars/:id', async (req, res) => {
 const userId = req.params.id 
 
@@ -161,7 +161,7 @@ try {
     res.status(500).json({err: err.message})
 }
 })
-//Usando PATCH
+
 api.patch('/cars/:id', async (req, res) => {
 const userId = req.params.id
 const { brand, model, year, items } = req.body;
@@ -212,7 +212,4 @@ try {
 }
 })
 
-const existsOrError = () => {
-
-}
 module.exports = api
