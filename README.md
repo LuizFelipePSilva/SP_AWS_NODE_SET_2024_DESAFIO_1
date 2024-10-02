@@ -122,23 +122,13 @@ PATCH /api/v1/cars/{id}
  ]
 }
 ```
-**Corpo da resposta (JSON):**
-```json
-{
- "message": "Carro atualizado com sucesso."
-}
-```
+
 
 ### 5. Excluir Carro
 ```http
 DELETE /api/v1/cars/{id}
 ```
-**Corpo da resposta (JSON):**
-```json
-{
- "message": "Carro excluído com sucesso."
-}
-```
+
 
 ## Tecnologias Usadas
 - [Node.js](https://nodejs.org/) - Ambiente de execução JavaScript
