@@ -10,14 +10,18 @@ const {brand, model, year} = req.query
 
 limit = parseInt(limit)
 
-if(!limit || limit < 1) {
+if(isNaN(limit) || limit < 1) {
     limit = 5
 }
 
 if(limit > 10) {
     limit = 10
 }
-const offset = (page - 1) * limit
+
+if(isNaN(page) || page < 1) {
+    page = 1
+}
+const offset = parseInt((page - 1) * limit)
 
 try {
     const { count, rows } = await Car.findAndCountAll({
@@ -31,16 +35,14 @@ try {
         offset: offset
     }
 )
-let y = Math.round(count/limit)   
+let totalPages = Math.ceil(count/limit)   
 res.status(200).json({
     count: count,
-    pages: y,
-    data: [
-        rows
-    ]
+    pages: totalPages,
+    data: rows
 })
 } catch (err) {
-    res.status(404).json({error: err.message})
+    res.status(404).send({err: err.message})
 }
 })
 //Usando o metodo POST
@@ -85,7 +87,6 @@ api.post('/cars', async (req, res) => {
 
         return res.status(201).json({ id: newCar.id });
     } catch (error) {
-        console.error('Erro ao criar o carro:', error);
         return res.status(500).json({ error: error.message });
     }
 });;
