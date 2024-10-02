@@ -68,10 +68,12 @@ api.post('/cars', async (req, res) => {
     if (year < 2015 || year > 2025) {
         return res.status(400).json({ error: 'year should be between 2015 and 2025' });
     }
+
     const uniqueItemsSet = new Set(items)
     if(uniqueItemsSet.size !== items.length) {
         return res.status(400).json({error: "items should not contain duplicates"})
     }
+
     try {
         const existingCar = await Car.findOne({ where: { brand, model, year } });
 
@@ -85,7 +87,7 @@ api.post('/cars', async (req, res) => {
             year,
         });
 
-            const carItems = uniqueItems.map(item => ({ name: item, car_id: newCar.id }));
+            const carItems = [...uniqueItemsSet].map(item => ({ name: item, car_id: newCar.id }));
             await CarItem.bulkCreate(carItems);
 
         return res.status(201).json({ id: newCar.id });
