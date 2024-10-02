@@ -4,8 +4,44 @@ const { Car, CarItem } = require('../models/index');
 const {Op, where} = require('sequelize')
 
 //Usando o Get Geral!
-api.get('/cars', (req, res) => {
+api.get('/cars', async (req, res) => {
+let {limit, page} = req.query
+const {brand, model, year} = req.query
 
+limit = parseInt(limit)
+
+if(!limit || limit < 1) {
+    limit = 5
+}
+
+if(limit > 10) {
+    limit = 10
+}
+const offset = (page - 1) * limit
+
+try {
+    const { count, rows } = await Car.findAndCountAll({
+        attributes: ['id', 'brand', 'model', 'year'],
+        where: {
+            ...(brand && {brand}),
+            ...(model && {model}),
+            ...(year && {year})
+        },
+        limit: limit,
+        offset: offset
+    }
+)
+let y = Math.round(count/limit)   
+res.status(200).json({
+    count: count,
+    pages: y,
+    data: [
+        rows
+    ]
+})
+} catch (err) {
+    res.status(404).json({error: err.message})
+}
 })
 //Usando o metodo POST
 api.post('/cars', async (req, res) => {
