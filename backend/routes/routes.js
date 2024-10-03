@@ -177,7 +177,7 @@ if (year !== undefined &&(year < 2015 || year > 2025)) {
 }
 let filteredItems = []
 if(items) {
-    if(Array.isArray(items)) {
+    if(!Array.isArray(items)) {
     return res.status(400).json({ error: "items should be an array" });
     }
         
@@ -201,15 +201,27 @@ try {
     if(brand) verifyCar.brand = brand
     if(model) verifyCar.model = model
     if(year) verifyCar.year = year
-    if(items) verifyCarItem.items = items
+    if(items) verifyCarItem.name = items
     
     const existingCar = await Car.findOne({ where: verifyCar });
 
-    const existItemOfCar = await CarItem.findOne({where: verifyCarItem})
+    if(existingCar){ 
+    const existItemOfCar = await CarItem.findAll({
+        where: {car_id: existingCar.id},
+        attributes: ['name'],
+        raw: true 
+    })
 
-    if (existingCar && existItemOfCar) {
+    const itemsName = existItemOfCar.map(item => item.name)
+
+    const allExist = items.every(item => itemsName.includes(item))
+
+    if (allExist) {
         return res.status(409).json({ error: 'there is already a car with this data' });
     }
+    }
+
+
     const updateBody = {}
     if(brand) updateBody.brand = brand
     if(model) updateBody.model = model
@@ -218,6 +230,7 @@ try {
     if(Object.keys(updateBody).length > 0) {
         await Car.update(updateBody, {where: {id: userId}})
     }
+    
     if(filteredItems.length > 0) {
         await CarItem.destroy({where: {car_id: userId}})
         const carItems = filteredItems.map(item => ({
@@ -231,6 +244,7 @@ try {
     }
     return res.status(204).send()
 } catch (error) {
+    console.log(error)
     return res.status(500).json({error: error.message})
 }
 })
