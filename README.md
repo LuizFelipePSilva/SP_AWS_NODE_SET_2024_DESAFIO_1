@@ -50,6 +50,21 @@ Antes de começar, você precisa ter instaladas as seguintes ferramentas:
 
 A API oferece os seguintes **endpoints** para gerenciar informações dos carros:
 
+
+## Dicas de Como Usar a API
+
+Para testar a API do **Compasscar**, você pode utilizar ferramentas como o **Postman** ou o **Insomnia**, que são softwares populares para testar APIs RESTful. Aqui está um passo a passo sobre como configurar e enviar requisições utilizando o **Postman**:
+
+### Configuração no Postman:
+
+1. **Método de Envio**: Selecione o método apropriado (GET, POST, PATCH, DELETE)  para o endpoint que deseja utilizar.
+2. **URL**: Insira a URL correta do endpoint, por exemplo, `http://localhost:3333/api/v1/cars` para listar todos os carros ou `http://localhost:3333/api/v1/cars/{id}` para consultar um carro específico.
+3. **Body (quando aplicável)**: Para endpoints que requerem envio de dados (como `POST` e `PATCH`), siga os seguintes passos:
+   - Selecione a aba **Body**.
+   - Escolha a opção **raw**.
+   - No menu dropdown à direita, escolha o formato **JSON**.
+4. **Content-Type**: Certifique-se de que o **Content-Type** está definido como `application/json` para garantir que os dados sejam interpretados corretamente pela API.
+
 ### 1. Criar Carro
 
 - **Endpoint**: `POST /api/v1/cars`
