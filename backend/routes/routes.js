@@ -73,13 +73,13 @@ res.status(200).json({
 api.post('/cars', async (req, res) => {
     const { brand, model, year, items } = req.body;
 
-    if (!brand) {
+    if (!brand || typeof brand !== 'string') {
         return res.status(400).json({ error: 'brand is required' });
     }
-    if (!model) {
+    if (!model || typeof model !== 'string') {
         return res.status(400).json({ error: 'model is required' });
     }
-    if (year === undefined) {
+    if (year === undefined || typeof year !== 'number') {
         return res.status(400).json({ error: 'year is required' });
     }
     if (!items || items.length === 0) {
@@ -91,9 +91,6 @@ api.post('/cars', async (req, res) => {
     }
 
     const uniqueItemsSet = new Set(items)
-    if(uniqueItemsSet.size !== items.length) {
-        return res.status(400).json({error: "items should not contain duplicates"})
-    }
 
     try {
         const existingCar = await Car.findOne({ where: { brand, model, year } });
@@ -205,9 +202,9 @@ try {
 
     const verifyCar = {}
     const verifyCarItem = {}
-    if(brand) verifyCar.brand = brand
-    if(model) verifyCar.model = model
-    if(year) verifyCar.year = year
+    if(brand && typeof brand === "string") verifyCar.brand = brand
+    if(model && typeof model === "string") verifyCar.model = model
+    if(year && typeof year === "number" ) verifyCar.year = year
     if(items) verifyCarItem.name = items
     
     const existingCar = await Car.findOne({ where: verifyCar });
@@ -232,9 +229,9 @@ try {
 
 
     const updateBody = {}
-    if(brand) updateBody.brand = brand
-    if(model) updateBody.model = model
-    if(year) updateBody.year = year
+    if(brand && typeof brand === "string") updateBody.brand = brand
+    if(model && typeof model === "string") updateBody.model = model
+    if(year && typeof year === "number") updateBody.year = year
 
     if(Object.keys(updateBody).length > 0) {
         await Car.update(updateBody, {where: {id: userId}})
