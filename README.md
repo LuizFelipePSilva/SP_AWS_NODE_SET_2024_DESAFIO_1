@@ -90,13 +90,15 @@ A API oferece os seguintes **endpoints** para gerenciar informações dos carros
       "id": 1,
       "brand": "Volkswagen",
       "model": "GOL",
-      "year": 2015
+      "year": 2015,
+      "items": ["Ar-condicionado", "Direção Hidráulica", "Trava Elétrica"]
     },
     {
       "id": 2,
       "brand": "Chevrolet",
       "model": "Onix",
-      "year": 2025
+      "year": 2025,
+      "items": ["Ar-condicionado", "Trava Elétrica"]
     }
   ]
 }
