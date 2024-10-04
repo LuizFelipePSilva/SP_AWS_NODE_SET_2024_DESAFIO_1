@@ -24,7 +24,14 @@ if(isNaN(page) || page < 1) {
 const offset = parseInt((page - 1) * limit)
 
 try {
-    const { count, rows } = await Car.findAndCountAll({
+    const count = await Car.count({
+        where: {
+            ...(brand && {brand}),
+            ...(model && {model}),
+            ...(year && {year})
+        },
+    })
+    const rows  = await Car.findAll({
         attributes: ['id', 'brand', 'model', 'year'],
         where: {
             ...(brand && {brand}),
