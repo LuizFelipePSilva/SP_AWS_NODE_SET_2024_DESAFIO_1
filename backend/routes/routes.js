@@ -110,7 +110,7 @@ api.post('/cars', async (req, res) => {
 
         return res.status(201).json({ id: newCar.id });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: "internal server error" });
     }
 });;
 
@@ -140,7 +140,7 @@ api.get('/cars/:id', async (req, res) => {
         
         res.status(200).send({...cleanCarData})
     } catch (err) {
-        res.status(500).json({ error: err })
+        res.status(500).json({error: "internal server error" })
     }
 })
 
@@ -162,7 +162,7 @@ try {
 
     return res.status(204).send()
 } catch (err) {
-    res.status(500).json({err: err.message})
+    res.status(500).json({error: "internal server error"})
 }
 })
 
@@ -247,7 +247,7 @@ try {
     return res.status(204).send()
 } catch (error) {
     console.log(error)
-    return res.status(500).json({error: error.message})
+    return res.status(500).json({error: "internal server error"})
 }
 })
 
