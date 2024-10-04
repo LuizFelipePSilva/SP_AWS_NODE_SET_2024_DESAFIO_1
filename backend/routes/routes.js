@@ -26,17 +26,17 @@ const offset = parseInt((page - 1) * limit)
 try {
     const count = await Car.count({
         where: {
-            ...(brand && {brand}),
-            ...(model && {model}),
-            ...(year && {year})
+            ...(brand && { brand: { [Op.like]: `%${brand}%` } }),
+            ...(model && { model: { [Op.like]: `%${model}%` } }),
+            ...(year && { year })
         },
-    })
+    });
     const rows  = await Car.findAll({
         attributes: ['id', 'brand', 'model', 'year'],
         where: {
-            ...(brand && {brand}),
-            ...(model && {model}),
-            ...(year && {year})
+            ...(brand && { brand: { [Op.like]: `%${brand}%` } }),
+            ...(model && { model: { [Op.like]: `%${model}%` } }),
+            ...(year && { year })
         },
         include:[{
             model: CarItem,
