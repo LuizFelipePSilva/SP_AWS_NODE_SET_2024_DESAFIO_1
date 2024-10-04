@@ -214,7 +214,9 @@ try {
 
     const itemsName = existItemOfCar.map(item => item.name)
 
-    const allExist = items.every(item => itemsName.includes(item))
+    const sameLengh = items.length === itemsName.length
+
+    const allExist = sameLengh && items.every(item => itemsName.includes(item))
 
     if (allExist) {
         return res.status(409).json({ error: 'there is already a car with this data' });
