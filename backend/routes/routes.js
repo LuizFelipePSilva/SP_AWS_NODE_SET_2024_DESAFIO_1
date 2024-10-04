@@ -26,17 +26,17 @@ const offset = parseInt((page - 1) * limit)
 try {
     const count = await Car.count({
         where: {
-            ...(brand && {brand}),
-            ...(model && {model}),
-            ...(year && {year})
+            ...(brand && { brand: { [Op.like]: `%${brand}%` } }),
+            ...(model && { model: { [Op.like]: `%${model}%` } }),
+            ...(year && { year })
         },
-    })
+    });
     const rows  = await Car.findAll({
         attributes: ['id', 'brand', 'model', 'year'],
         where: {
-            ...(brand && {brand}),
-            ...(model && {model}),
-            ...(year && {year})
+            ...(brand && { brand: { [Op.like]: `%${brand}%` } }),
+            ...(model && { model: { [Op.like]: `%${model}%` } }),
+            ...(year && { year })
         },
         include:[{
             model: CarItem,
@@ -73,13 +73,13 @@ res.status(200).json({
 api.post('/cars', async (req, res) => {
     const { brand, model, year, items } = req.body;
 
-    if (!brand) {
+    if (!brand || typeof brand !== 'string') {
         return res.status(400).json({ error: 'brand is required' });
     }
-    if (!model) {
+    if (!model || typeof model !== 'string') {
         return res.status(400).json({ error: 'model is required' });
     }
-    if (year === undefined) {
+    if (year === undefined || typeof year !== 'number') {
         return res.status(400).json({ error: 'year is required' });
     }
     if (!items || items.length === 0) {
@@ -91,9 +91,6 @@ api.post('/cars', async (req, res) => {
     }
 
     const uniqueItemsSet = new Set(items)
-    if(uniqueItemsSet.size !== items.length) {
-        return res.status(400).json({error: "items should not contain duplicates"})
-    }
 
     try {
         const existingCar = await Car.findOne({ where: { brand, model, year } });
@@ -182,17 +179,13 @@ if(!userId) {
 if (year !== undefined &&(year < 2015 || year > 2025)) {
     return res.status(400).json({ error: 'year should be between 2015 and 2025' });
 }
-let filteredItems = []
+const uniqueItemsSet = new Set(items)
+let filteredItems = [...uniqueItemsSet]
+
 if(items) {
     if(!Array.isArray(items)) {
     return res.status(400).json({ error: "items should be an array" });
     }
-        
-    const uniqueItemsSet = new Set(items)
-    if(uniqueItemsSet.size !== items.length) {
-        return res.status(400).json({error: "items should not contain duplicates"})
-    }
-    filteredItems = items.filter(item => item)
 }
 
 
@@ -205,36 +198,36 @@ try {
 
     const verifyCar = {}
     const verifyCarItem = {}
-    if(brand) verifyCar.brand = brand
-    if(model) verifyCar.model = model
-    if(year) verifyCar.year = year
-    if(items) verifyCarItem.name = items
+    if(brand && typeof brand === "string") verifyCar.brand = brand
+    if(model && typeof model === "string") verifyCar.model = model
+    if(year && typeof year === "number" ) verifyCar.year = year
+    if(items && typeof items === "object") verifyCarItem.name = items
     
     const existingCar = await Car.findOne({ where: verifyCar });
 
-    if(existingCar){ 
-    const existItemOfCar = await CarItem.findAll({
-        where: {car_id: existingCar.id},
-        attributes: ['name'],
-        raw: true 
-    })
+    if (existingCar) {
+        const existItemOfCar = await CarItem.findAll({
+            where: { car_id: existingCar.id },
+            attributes: ['name'],
+            raw: true
+        })
 
-    const itemsName = existItemOfCar.map(item => item.name)
+        const itemsName = existItemOfCar.map(item => item.name)
+        if (items && itemsName) {
+            const sameLengh = items.length === itemsName.length
+            const allExist = sameLengh && items.every(item => itemsName.includes(item))
 
-    const sameLengh = items.length === itemsName.length
-
-    const allExist = sameLengh && items.every(item => itemsName.includes(item))
-
-    if (allExist) {
-        return res.status(409).json({ error: 'there is already a car with this data' });
-    }
+            if (allExist) {
+                return res.status(409).json({ error: 'there is already a car with this data' });
+            }
+        }
     }
 
 
     const updateBody = {}
-    if(brand) updateBody.brand = brand
-    if(model) updateBody.model = model
-    if(year) updateBody.year = year
+    if(brand && typeof brand === "string") updateBody.brand = brand
+    if(model && typeof model === "string") updateBody.model = model
+    if(year && typeof year === "number") updateBody.year = year
 
     if(Object.keys(updateBody).length > 0) {
         await Car.update(updateBody, {where: {id: userId}})
