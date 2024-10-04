@@ -24,7 +24,14 @@ if(isNaN(page) || page < 1) {
 const offset = parseInt((page - 1) * limit)
 
 try {
-    const { count, rows } = await Car.findAndCountAll({
+    const count = await Car.count({
+        where: {
+            ...(brand && {brand}),
+            ...(model && {model}),
+            ...(year && {year})
+        },
+    })
+    const rows  = await Car.findAll({
         attributes: ['id', 'brand', 'model', 'year'],
         where: {
             ...(brand && {brand}),
@@ -214,7 +221,9 @@ try {
 
     const itemsName = existItemOfCar.map(item => item.name)
 
-    const allExist = items.every(item => itemsName.includes(item))
+    const sameLengh = items.length === itemsName.length
+
+    const allExist = sameLengh && items.every(item => itemsName.includes(item))
 
     if (allExist) {
         return res.status(409).json({ error: 'there is already a car with this data' });
