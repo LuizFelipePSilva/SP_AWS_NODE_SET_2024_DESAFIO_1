@@ -179,17 +179,13 @@ if(!userId) {
 if (year !== undefined &&(year < 2015 || year > 2025)) {
     return res.status(400).json({ error: 'year should be between 2015 and 2025' });
 }
-let filteredItems = []
+const uniqueItemsSet = new Set(items)
+let filteredItems = [...uniqueItemsSet]
+
 if(items) {
     if(!Array.isArray(items)) {
     return res.status(400).json({ error: "items should be an array" });
     }
-        
-    const uniqueItemsSet = new Set(items)
-    if(uniqueItemsSet.size !== items.length) {
-        return res.status(400).json({error: "items should not contain duplicates"})
-    }
-    filteredItems = items.filter(item => item)
 }
 
 
@@ -205,26 +201,26 @@ try {
     if(brand && typeof brand === "string") verifyCar.brand = brand
     if(model && typeof model === "string") verifyCar.model = model
     if(year && typeof year === "number" ) verifyCar.year = year
-    if(items) verifyCarItem.name = items
+    if(items && typeof items === "object") verifyCarItem.name = items
     
     const existingCar = await Car.findOne({ where: verifyCar });
 
-    if(existingCar){ 
-    const existItemOfCar = await CarItem.findAll({
-        where: {car_id: existingCar.id},
-        attributes: ['name'],
-        raw: true 
-    })
+    if (existingCar) {
+        const existItemOfCar = await CarItem.findAll({
+            where: { car_id: existingCar.id },
+            attributes: ['name'],
+            raw: true
+        })
 
-    const itemsName = existItemOfCar.map(item => item.name)
+        const itemsName = existItemOfCar.map(item => item.name)
+        if (items && itemsName) {
+            const sameLengh = items.length === itemsName.length
+            const allExist = sameLengh && items.every(item => itemsName.includes(item))
 
-    const sameLengh = items.length === itemsName.length
-
-    const allExist = sameLengh && items.every(item => itemsName.includes(item))
-
-    if (allExist) {
-        return res.status(409).json({ error: 'there is already a car with this data' });
-    }
+            if (allExist) {
+                return res.status(409).json({ error: 'there is already a car with this data' });
+            }
+        }
     }
 
 
