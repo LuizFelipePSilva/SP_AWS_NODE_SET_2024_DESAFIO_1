@@ -1,7 +1,7 @@
 # Projeto Compasscar - Sistema de Locação de Carros
 
 ## Descrição
-O **Compasscar** é uma API backend projetada para gerenciar o sistema de **locação de veículos**, permitindo a criação, leitura, atualização e exclusão (CRUD) de informações sobre carros. O sistema foi construído usando **Node.js** e **Express**, oferecendo uma estrutura **escalável**, **segura** e **fácil de usar**. Este projeto utiliza **SQLite3** como banco de dados e está pronto para ser estendido para outros sistemas de banco de dados.
+O **Compasscar** é uma API backend projetada para gerenciar o sistema de **locação de veículos**, permitindo a criação, leitura, atualização e exclusão (CRUD) de informações sobre carros. O sistema foi construído usando **Node.js** e **Express**, oferecendo uma estrutura **escalável**, **segura** e **fácil de usar**. Este projeto utiliza **MySql** como banco de dados e está pronto para ser estendido para outros sistemas de banco de dados.
 
 ## Recursos Principais
 - Criação, leitura, atualização e exclusão de carros.
@@ -15,10 +15,11 @@ Antes de começar, você precisa ter instaladas as seguintes ferramentas:
 
 - [Node.js](https://nodejs.org/en/download/) (v20.15.1)
 - [NPM](https://www.npmjs.com/get-npm) (v10.8.3)
+- [MySQL Server 8.0](https://www.mysql.com/downloads/) (v8.0)
   
 ### Dependências
-- **SQLite3** (v5.1.7)
 - **Express** (v4.21.0)
+- **mysql2** (v3.11.3)
 - **Sequelize** (v6.37.3)
 - **Nodemon** (v3.1.7)
 
@@ -186,7 +187,7 @@ Para testar a API do **Compasscar**, você pode utilizar ferramentas como o **Po
 - [Node.js](https://nodejs.org/) - Ambiente de execução JavaScript para o backend.
 - [Express](https://expressjs.com/) - Framework para a criação de APIs.
 - [Sequelize](https://sequelize.org/) - ORM para gerenciamento de banco de dados SQL.
-- [SQLite](https://www.sqlite.org/) - Banco de dados SQL leve e embutido.
+- [MySql](https://www.mysql.com/downloads/) - Banco de dados MySQL
 
 
 
@@ -195,7 +196,7 @@ Se você tiver dúvidas ou sugestões, entre em contato através de:
 
 - **LinkedIn**: [Luiz Felipe P. Silva](https://www.linkedin.com/in/luizfelipepsilva/)
 - **Email**: [LuizFelipePSilva@outlook.com.br](mailto:LuizFelipePSilva@outlook.com.br)
-- **GitHub**: [Luiz Felipe P. Silva] (https://github.com/LuizFelipePSilva)
+- **GitHub**: [Luiz Felipe P. Silva](https://github.com/LuizFelipePSilva)
 
 
 
